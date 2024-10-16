@@ -21,7 +21,7 @@ public class LeagueDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlite($"Data Source={_databasePath}")
-            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+            //.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
             .LogTo(Console.WriteLine,LogLevel.Information)
             .EnableSensitiveDataLogging()
             .EnableDetailedErrors();
