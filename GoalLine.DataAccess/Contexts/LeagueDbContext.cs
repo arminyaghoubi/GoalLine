@@ -1,5 +1,6 @@
 ﻿using GoalLine.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace GoalLine.DataAccess.Contexts;
 
@@ -19,7 +20,11 @@ public class LeagueDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlite($"Data Source={_databasePath}");
+        optionsBuilder.UseSqlite($"Data Source={_databasePath}")
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+            .LogTo(Console.WriteLine,LogLevel.Information)
+            .EnableSensitiveDataLogging()
+            .EnableDetailedErrors();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
