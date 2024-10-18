@@ -15,6 +15,13 @@ using LeagueDbContext context = new();
 //await ProjectionsAndSelect();
 //await NoTracking();
 //await ListVsQueryable();
+//await SingleInsertCoach();
+//await BatchInsertCoach();
+//await UpdateConnected();
+//await UpdateDisconnected();
+//await SimpleDelete();
+//await BatchDeleteWithExecuteDelete();
+//await BatchUpdateWithExecuteUpdate();
 
 async Task GetAllTeams()
 {
@@ -111,7 +118,7 @@ async Task GetFilteredTeams()
     Console.WriteLine("===========EF Function===========");
     var partialMachesLike = await context.Teams
         .AsNoTracking()
-        .Where(t => EF.Functions.Like(t.Title,$"%{term}%"))
+        .Where(t => EF.Functions.Like(t.Title, $"%{term}%"))
         .ToListAsync();
     foreach (var team in partialMachesLike)
     {
@@ -124,10 +131,10 @@ async Task AggregateMethods()
     var countOfTeams = await context.Teams.CountAsync();
     Console.WriteLine($"Count of teams {countOfTeams}");
 
-    var countOfTeamsWithCondition=await context.Teams.CountAsync(t=>t.Title.Contains("F.C"));
+    var countOfTeamsWithCondition = await context.Teams.CountAsync(t => t.Title.Contains("F.C"));
     Console.WriteLine($"Count of teams with condition {countOfTeamsWithCondition}");
 
-    var maxId = await context.Teams.MaxAsync(t=>t.Id);
+    var maxId = await context.Teams.MaxAsync(t => t.Id);
     Console.WriteLine($"Max by id {maxId}");
 
     var minId = await context.Teams.MinAsync(t => t.Id);
@@ -261,6 +268,80 @@ async Task ListVsQueryable()
         Console.WriteLine(t.Id);
     }
 
+}
+
+async Task SingleInsertCoach()
+{
+    var coach = new Coach
+    {
+        FirstName = "Juan Carlos",
+        LastName = "Garrido",
+        CreatedDate = DateTime.Now
+    };
+
+    await context.AddAsync(coach);
+    await context.SaveChangesAsync();
+}
+
+async Task BatchInsertCoach()
+{
+    List<Coach> coaches = new List<Coach>
+    {
+        new Coach{FirstName="Yahya",LastName="Golmohammadi",CreatedDate=DateTime.Now},
+        new Coach{FirstName="José",LastName="Morais",CreatedDate=DateTime.Now},
+        new Coach{FirstName="Dragan",LastName="Skocic",CreatedDate=DateTime.Now},
+    };
+
+    await context.AddRangeAsync(coaches);
+    // Console.WriteLine(context.ChangeTracker.DebugView.LongView);
+    await context.SaveChangesAsync();
+    // Console.WriteLine(context.ChangeTracker.DebugView.LongView);
+}
+
+async Task UpdateConnected()
+{
+    var coach = await context.Coaches.FindAsync(2) ?? throw new ArgumentNullException();
+
+    coach.CreatedDate = DateTime.Now;
+
+    await context.SaveChangesAsync();
+}
+
+async Task UpdateDisconnected()
+{
+    var coach = await context.Coaches
+        .AsNoTracking()
+        .FirstOrDefaultAsync(c => c.Id == 2) ?? throw new ArgumentNullException();
+
+    coach.CreatedDate = DateTime.Now;
+    context.Update(coach);
+
+    Console.WriteLine(context.ChangeTracker.DebugView.LongView);
+    await context.SaveChangesAsync();
+    Console.WriteLine(context.ChangeTracker.DebugView.LongView);
+}
+
+async Task SimpleDelete()
+{
+    var coach = await context.Coaches.FindAsync(3)?? throw new ArgumentNullException();
+
+    context.Remove(coach);
+
+    await context.SaveChangesAsync();
+}
+
+async Task BatchDeleteWithExecuteDelete()
+{
+    await context.Coaches
+        .Where(c => c.Id > 10)
+        .ExecuteDeleteAsync();
+}
+
+async Task BatchUpdateWithExecuteUpdate()
+{
+    await context.Coaches
+        .Where(c => c.Id > 10)
+        .ExecuteUpdateAsync(set => set.SetProperty(prop => prop.CreatedDate, DateTime.Now));
 }
 
 // DTO
