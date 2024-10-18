@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace GoalLine.DataAccess.Configurations;
 
-public class TeamConfiguration : IEntityTypeConfiguration<Team>
+internal class TeamConfiguration : IEntityTypeConfiguration<Team>
 {
     public void Configure(EntityTypeBuilder<Team> builder)
     {
